@@ -1,5 +1,6 @@
 package org.turbanov.actions;
 
+import javax.swing.Icon;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.intellij.execution.Executor;
@@ -25,7 +26,8 @@ public class RunConfigurationAsAction extends AnAction {
     private final String executorId;
     private final AtomicInteger counter = new AtomicInteger();
 
-    public RunConfigurationAsAction(String runConfigurationName, String executorId) {
+    public RunConfigurationAsAction(String runConfigurationName, String executorId, Icon icon, String text) {
+        super(text, null, icon);
         this.runConfigurationName = runConfigurationName;
         this.executorId = executorId;
     }

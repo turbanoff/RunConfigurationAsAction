@@ -1,5 +1,6 @@
 package org.turbanov.actions;
 
+import javax.swing.Icon;
 import java.util.List;
 
 import com.intellij.execution.Executor;
@@ -14,6 +15,7 @@ import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,32 +24,44 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Bootstrap extends AbstractProjectComponent {
     private static final Logger log = Logger.getInstance(RunConfigurationAsAction.class);
-    private static final String ACTION_PREFIX = "Action";
-    private static final PluginId PLUGIN_ID = PluginId.getId("org.turbanov.run.configurations.as.action");
+    private static final String ACTION_ID_PREFIX = "RunConfigurationAsAction";
+    private static final PluginId PLUGIN_ID = PluginId.getId("org.turbanov.run.configuration.as.action");
 
     public Bootstrap(Project project) {
         super(project);
     }
 
     private void registerAction(@NotNull RunnerAndConfigurationSettings runConfig, @NotNull Executor executor) {
-        String actionId = ACTION_PREFIX  + executor.getId() + " " + runConfig.getName();
+        String actionId = makeActionId(executor, runConfig.getName());
         ActionManager actionManager = ActionManagerEx.getInstance();
         AnAction action = actionManager.getAction(actionId);
         if (action == null) {
-            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId());
+            Icon icon = makeIcon(runConfig, executor);
+            String text = executor.getActionName() + " " + runConfig.getName();
+            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text);
             actionManager.registerAction(actionId, action, PLUGIN_ID);
         } else if (action instanceof RunConfigurationAsAction) {
             ((RunConfigurationAsAction) action).register();
         } else {
-            log.warn("Someone uses our action id! " + action);
+            log.warn("Someone uses our action id = " + actionId + ": " + action.getClass() + " " + action);
         }
+    }
+
+    private Icon makeIcon(@NotNull RunnerAndConfigurationSettings runConfig, @NotNull Executor executor) {
+        Icon icon = executor.getIcon();
+        Icon result = IconUtil.addText(icon, runConfig.getName());
+        return result;
+    }
+
+    private static String makeActionId(Executor executor, String runConfigName) {
+        return ACTION_ID_PREFIX + "_" + executor.getId() + "_" + runConfigName;
     }
 
     public void removeForAllExecutors(String runConfigName) {
         Executor[] executors = ExecutorRegistry.getInstance().getRegisteredExecutors();
         ActionManager actionManager = ActionManager.getInstance();
         for (Executor executor : executors) {
-            String actionId = ACTION_PREFIX  + executor.getId() + " " + runConfigName;
+            String actionId = makeActionId(executor, runConfigName);
             AnAction action = actionManager.getAction(actionId);
             if (action == null || !(action instanceof RunConfigurationAsAction)) {
                 continue;
@@ -72,7 +86,7 @@ public class Bootstrap extends AbstractProjectComponent {
     @NotNull
     @Override
     public String getComponentName() {
-        return ACTION_PREFIX;
+        return ACTION_ID_PREFIX;
     }
 
     @Override
