@@ -1,0 +1,24 @@
+<idea-plugin>
+  <id>org.turbanov.run.configurations.as.action</id>
+  <name>RunConfigurationAsAction</name>
+  <version>1.0</version>
+  <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
+
+  <description><![CDATA[
+      Register all run configuration as actions.<br>
+      It's allows to create button in toolbar to run specific configuration.
+    ]]></description>
+
+  <change-notes><![CDATA[
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="139.0"/>
+
+  <project-components>
+    <component>
+      <implementation-class>org.turbanov.actions.Bootstrap</implementation-class>
+    </component>
+  </project-components>
+</idea-plugin>
