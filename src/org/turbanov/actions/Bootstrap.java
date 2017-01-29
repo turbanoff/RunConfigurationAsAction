@@ -1,6 +1,7 @@
 package org.turbanov.actions;
 
 import javax.swing.Icon;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import com.intellij.execution.Executor;
@@ -8,6 +9,8 @@ import com.intellij.execution.ExecutorRegistry;
 import com.intellij.execution.RunManagerAdapter;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.ide.ui.customization.CustomActionsSchema;
+import com.intellij.ide.ui.customization.CustomisedActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
@@ -107,6 +110,35 @@ public class Bootstrap extends AbstractProjectComponent {
         List<RunnerAndConfigurationSettings> allSettings = runManager.getAllSettings();
         for (RunnerAndConfigurationSettings setting : allSettings) {
             registerForAllExecutors(setting);
+        }
+
+        hackNavToolbar();
+    }
+
+    private void hackNavToolbar() {
+        AnAction correctAction = CustomActionsSchema.getInstance().getCorrectedAction("NavBarToolBar");
+        if (correctAction instanceof CustomisedActionGroup) {
+            CustomisedActionGroup action = (CustomisedActionGroup) correctAction;
+            Field field = null;
+            try {
+                field = action.getClass().getDeclaredField("myForceUpdate");
+            } catch (NoSuchFieldException e) {
+                try {
+                    field = action.getClass().getDeclaredField("f");
+                } catch (NoSuchFieldException ex) {
+                    //do nothing
+                }
+            }
+            if (field == null) {
+                log.info("Can't field field");
+                return;
+            }
+            try {
+                field.setAccessible(true);
+                field.set(action, true);
+            } catch (IllegalAccessException e) {
+                log.info("Access denied to field myForceUpdate");
+            }
         }
     }
 
