@@ -2,7 +2,10 @@ package org.turbanov.actions;
 
 import javax.swing.Icon;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
@@ -20,6 +23,8 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Andrey Turbanov
@@ -116,29 +121,26 @@ public class Bootstrap extends AbstractProjectComponent {
     }
 
     private void hackNavToolbar() {
-        AnAction correctAction = CustomActionsSchema.getInstance().getCorrectedAction("NavBarToolBar");
-        if (correctAction instanceof CustomisedActionGroup) {
-            CustomisedActionGroup action = (CustomisedActionGroup) correctAction;
-            Field field = null;
-            try {
-                field = action.getClass().getDeclaredField("myForceUpdate");
-            } catch (NoSuchFieldException e) {
-                try {
-                    field = action.getClass().getDeclaredField("f");
-                } catch (NoSuchFieldException ex) {
-                    //do nothing
-                }
-            }
-            if (field == null) {
-                log.info("Can't field field");
+        AnAction action = CustomActionsSchema.getInstance().getCorrectedAction("NavBarToolBar");
+        if (!(action instanceof CustomisedActionGroup)) {
+            return;
+        }
+        Map<String, Field> booleanFields = Arrays.stream(action.getClass().getDeclaredFields())
+                .filter(f -> f.getDeclaringClass() == boolean.class)
+                .collect(toMap(Field::getName, Function.identity()));
+        Field forceUpdate = booleanFields.get("myForceUpdate");
+        if (forceUpdate == null) {
+            if (booleanFields.size() > 1) {
+                log.warn("IDEA version isn't compatible. Plugin can work unstable. CustomisedActionGroup fields: " + booleanFields);
                 return;
             }
-            try {
-                field.setAccessible(true);
-                field.set(action, true);
-            } catch (IllegalAccessException e) {
-                log.info("Access denied to field myForceUpdate");
-            }
+            forceUpdate = booleanFields.values().iterator().next();
+        }
+        try {
+            forceUpdate.setAccessible(true);
+            forceUpdate.set(action, true);
+        } catch (IllegalAccessException e) {
+            log.warn("Access denied to field " + forceUpdate.getName());
         }
     }
 
