@@ -13,11 +13,16 @@
     ]]>
   </change-notes>
 
-  <idea-version since-build="139.0"/>
+  <idea-version since-build="143.0"/>
 
   <project-components>
     <component>
       <implementation-class>org.turbanov.actions.Bootstrap</implementation-class>
     </component>
   </project-components>
+  <actions>
+    <action id="org.turbanov.actions.CreateExecuteIconWithTextAction" class="org.turbanov.actions.CreateExecuteIconWithTextAction" text="Create Icon with Text">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+  </actions>
 </idea-plugin>

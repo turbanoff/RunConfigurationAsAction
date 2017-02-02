@@ -126,11 +126,11 @@ public class Bootstrap extends AbstractProjectComponent {
             return;
         }
         Map<String, Field> booleanFields = Arrays.stream(action.getClass().getDeclaredFields())
-                .filter(f -> f.getDeclaringClass() == boolean.class)
+                .filter(f -> f.getType() == boolean.class)
                 .collect(toMap(Field::getName, Function.identity()));
         Field forceUpdate = booleanFields.get("myForceUpdate");
         if (forceUpdate == null) {
-            if (booleanFields.size() > 1) {
+            if (booleanFields.size() != 1) {
                 log.warn("IDEA version isn't compatible. Plugin can work unstable. CustomisedActionGroup fields: " + booleanFields);
                 return;
             }
