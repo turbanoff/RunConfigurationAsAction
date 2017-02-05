@@ -117,11 +117,12 @@ public class Bootstrap extends AbstractProjectComponent {
             registerForAllExecutors(setting);
         }
 
-        hackNavToolbar();
+        reloadCustomizedToolbar("NavBarToolbar");
+        reloadCustomizedToolbar("MainToolBar");
     }
 
-    private void hackNavToolbar() {
-        AnAction action = CustomActionsSchema.getInstance().getCorrectedAction("NavBarToolBar");
+    private void reloadCustomizedToolbar(String toolbarName) {
+        AnAction action = CustomActionsSchema.getInstance().getCorrectedAction(toolbarName);
         if (!(action instanceof CustomisedActionGroup)) {
             return;
         }
