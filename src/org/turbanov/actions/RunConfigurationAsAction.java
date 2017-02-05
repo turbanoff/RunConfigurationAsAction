@@ -47,7 +47,7 @@ public class RunConfigurationAsAction extends AnAction {
 
         Executor executor = ExecutorRegistry.getInstance().getExecutorById(executorId);
         if (executor == null) {
-            log.info("Unable to Executor by id: " + executorId);
+            log.info("Unable to find Executor by id: " + executorId);
             return;
         }
 
