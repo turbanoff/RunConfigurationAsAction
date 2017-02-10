@@ -117,7 +117,7 @@ public class Bootstrap extends AbstractProjectComponent {
             registerForAllExecutors(setting);
         }
 
-        reloadCustomizedToolbar("NavBarToolbar");
+        reloadCustomizedToolbar("NavBarToolBar");
         reloadCustomizedToolbar("MainToolBar");
     }
 

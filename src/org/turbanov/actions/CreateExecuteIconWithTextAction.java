@@ -17,6 +17,7 @@ import java.io.OutputStream;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
+import com.intellij.ide.IdeBundle;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -28,7 +29,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.LayeredIcon;
-import com.intellij.ui.SizedIcon;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.panels.VerticalLayout;
@@ -57,16 +57,28 @@ public class CreateExecuteIconWithTextAction extends AnAction {
                         if (!dir.isDirectory()) {
                             return;
                         }
+                        VirtualFile child = dir.findChild(fileName);
+                        if (child != null) {
+                            if (Messages.OK != Messages.showOkCancelDialog(IdeBundle.message("prompt.overwrite.settings.file", child.toString()), IdeBundle.message("title.file.already.exists"), Messages.getWarningIcon()))
+                                return;
+                        }
                         ApplicationManager.getApplication().runWriteAction(() -> {
                             try {
-                                VirtualFile file = dir.createChildData("Run Configuration as Action Plugin", fileName);
+                                VirtualFile file;
+                                if (child == null) {
+                                    file = dir.createChildData("Run Configuration as Action Plugin", fileName);
+                                } else {
+                                    file = child;
+                                }
+
                                 try (OutputStream output = file.getOutputStream(CreateExecuteIconWithTextAction.this)) {
                                     BufferedImage image = ImageUtil.toBufferedImage(IconUtil.toImage(resultIcon));
                                     ImageIO.write(image, "png", output);
                                 }
-                                Messages.showInfoMessage("File saved " + file.getPath(), "Icon Saved");
+
+                                ApplicationManager.getApplication().invokeLater(() -> Messages.showInfoMessage("File saved " + file.getPath(), "Icon Saved"));
                             } catch (IOException ex) {
-                                Messages.showErrorDialog("Error: " + ExceptionUtil.getThrowableText(ex), "Unable to Save Icon File");
+                                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog("Error: " + ExceptionUtil.getThrowableText(ex), "Unable to Save Icon File"));
                             }
                         });
                     });

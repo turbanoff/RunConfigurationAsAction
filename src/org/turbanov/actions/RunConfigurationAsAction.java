@@ -24,7 +24,7 @@ public class RunConfigurationAsAction extends AnAction {
 
     private final String runConfigurationName;
     private final String executorId;
-    private final AtomicInteger counter = new AtomicInteger();
+    private final AtomicInteger counter = new AtomicInteger(1);
 
     public RunConfigurationAsAction(String runConfigurationName, String executorId, Icon icon, String text) {
         super(text, null, icon);
@@ -41,7 +41,7 @@ public class RunConfigurationAsAction extends AnAction {
         RunnerAndConfigurationSettings runConfig = runManager.findConfigurationByName(runConfigurationName);
 
         if (runConfig == null) {
-            log.info("Unable to find Run configuration with name: " + runConfigurationName);
+            log.info("Unable to find Run configuration with name: " + runConfigurationName + " in project " + project);
             return;
         }
 
