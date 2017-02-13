@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.0</version>
+  <version>1.1</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
@@ -10,6 +10,10 @@
     ]]></description>
 
   <change-notes><![CDATA[
+    <h3>1.5</h3>
+      <ul>
+        <li>Properly load custom actions to Navigation Bar Toolbar</li>
+      </ul>
     ]]>
   </change-notes>
 
