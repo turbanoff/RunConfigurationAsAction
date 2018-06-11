@@ -12,7 +12,7 @@ Plugin is compatible with all major IDEs based on IntelliJ Platform starting fro
 * WebStorm
 * AppCode
 * Rider
-* Gogland
+* GoLand
 
 ## Repository link
 https://plugins.jetbrains.com/idea/plugin/9448-run-configuration-as-action

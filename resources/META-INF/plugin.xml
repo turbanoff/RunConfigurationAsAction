@@ -1,16 +1,21 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.1</version>
+  <version>1.2</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
-      Register all run configuration as actions.<br>
-      It's allows to create button in toolbar to run specific configuration.
+Register all run configuration as actions.<br>
+Now you can assign shortcuts to run configurations!
+Also it allows to create button in toolbar to run specific configuration.<br>
     ]]></description>
 
   <change-notes><![CDATA[
-    <h3>1.5</h3>
+    <h3>1.2</h3>
+      <ul>
+        <li>2018.2 support added</li>
+      </ul>
+    <h3>1.1</h3>
       <ul>
         <li>Properly load custom actions to Navigation Bar Toolbar</li>
       </ul>

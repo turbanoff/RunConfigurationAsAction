@@ -17,6 +17,7 @@ import com.intellij.ide.ui.customization.CustomisedActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
@@ -71,7 +72,7 @@ public class Bootstrap extends AbstractProjectComponent {
         for (Executor executor : executors) {
             String actionId = makeActionId(executor, runConfigName);
             AnAction action = actionManager.getAction(actionId);
-            if (action == null || !(action instanceof RunConfigurationAsAction)) {
+            if (!(action instanceof RunConfigurationAsAction)) {
                 continue;
             }
             int count = ((RunConfigurationAsAction) action).unregister();
@@ -117,8 +118,14 @@ public class Bootstrap extends AbstractProjectComponent {
             registerForAllExecutors(setting);
         }
 
-        reloadCustomizedToolbar("NavBarToolBar");
-        reloadCustomizedToolbar("MainToolBar");
+        int baseVersion = ApplicationInfo.getInstance().getBuild().getBaselineVersion();
+        if (baseVersion >= 182) {
+            //no hacks required in 2018.2+
+            CustomActionsSchema.setCustomizationSchemaForCurrentProjects();
+        } else {
+            reloadCustomizedToolbar("NavBarToolBar");
+            reloadCustomizedToolbar("MainToolBar");
+        }
     }
 
     private void reloadCustomizedToolbar(String toolbarName) {
@@ -132,7 +139,7 @@ public class Bootstrap extends AbstractProjectComponent {
         Field forceUpdate = booleanFields.get("myForceUpdate");
         if (forceUpdate == null) {
             if (booleanFields.size() != 1) {
-                log.warn("IDEA version isn't compatible. Plugin can work unstable. CustomisedActionGroup fields: " + booleanFields);
+                log.warn("IDEA version isn't compatible. Plugin can work unstable. CustomisedActionGroup fields: " + booleanFields.values());
                 return;
             }
             forceUpdate = booleanFields.values().iterator().next();
