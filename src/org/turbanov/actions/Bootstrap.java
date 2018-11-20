@@ -2,11 +2,14 @@ package org.turbanov.actions;
 
 import javax.swing.Icon;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.intellij.execution.ExecutionTarget;
+import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
 import com.intellij.execution.RunManagerAdapter;
@@ -18,12 +21,13 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
 import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.components.AbstractProjectComponent;
+import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -31,23 +35,29 @@ import static java.util.stream.Collectors.toMap;
  * @author Andrey Turbanov
  * @since 27.01.2017
  */
-public class Bootstrap extends AbstractProjectComponent {
+public class Bootstrap implements ProjectComponent {
     private static final Logger log = Logger.getInstance(RunConfigurationAsAction.class);
     private static final String ACTION_ID_PREFIX = "RunConfigurationAsAction";
     private static final PluginId PLUGIN_ID = PluginId.getId("org.turbanov.run.configuration.as.action");
 
-    public Bootstrap(Project project) {
-        super(project);
+    private final Project myProject;
+
+    public Bootstrap(@NotNull Project project) {
+        this.myProject = project;
     }
 
-    private void registerAction(@NotNull RunnerAndConfigurationSettings runConfig, @NotNull Executor executor) {
-        String actionId = makeActionId(executor, runConfig.getName());
+    private void registerAction(@NotNull RunnerAndConfigurationSettings runConfig,
+                                @NotNull Executor executor,
+                                @Nullable ExecutionTarget target) {
+        String actionId = makeActionId(executor, runConfig, target);
         ActionManager actionManager = ActionManagerEx.getInstance();
         AnAction action = actionManager.getAction(actionId);
         if (action == null) {
             Icon icon = makeIcon(runConfig, executor);
-            String text = executor.getActionName() + " " + runConfig.getName();
-            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text);
+            String text = executor.getActionName() + " '" + runConfig.getName() + "'" +
+                    (target == null ? "" : " " + target.getDisplayName());
+            String executionTargetId = target == null ? null : target.getId();
+            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text, executionTargetId);
             actionManager.registerAction(actionId, action, PLUGIN_ID);
         } else if (action instanceof RunConfigurationAsAction) {
             ((RunConfigurationAsAction) action).register();
@@ -62,34 +72,51 @@ public class Bootstrap extends AbstractProjectComponent {
         return result;
     }
 
-    private static String makeActionId(Executor executor, String runConfigName) {
-        return ACTION_ID_PREFIX + "_" + executor.getId() + "_" + runConfigName;
+    private static String makeActionId(@NotNull Executor executor,
+                                       @NotNull RunnerAndConfigurationSettings runConfig,
+                                       @Nullable ExecutionTarget target) {
+        String targetAdditional = target == null ? "" : "_" + target.getId();
+        return ACTION_ID_PREFIX + "_" + executor.getId() + "_" + runConfig.getName() + targetAdditional;
     }
 
-    public void removeForAllExecutors(String runConfigName) {
+    public void removeForAllExecutors(@NotNull RunnerAndConfigurationSettings runConfig) {
         Executor[] executors = ExecutorRegistry.getInstance().getRegisteredExecutors();
         ActionManager actionManager = ActionManager.getInstance();
+        List<ExecutionTarget> targets = getTargets(runConfig);
         for (Executor executor : executors) {
-            String actionId = makeActionId(executor, runConfigName);
-            AnAction action = actionManager.getAction(actionId);
-            if (!(action instanceof RunConfigurationAsAction)) {
-                continue;
-            }
-            int count = ((RunConfigurationAsAction) action).unregister();
-            if (count <= 0) {
-                if (count < 0) {
-                    log.warn("Someone remove more action than register " + action);
+            for (ExecutionTarget target : targets) {
+                String actionId = makeActionId(executor, runConfig, target);
+                AnAction action = actionManager.getAction(actionId);
+                if (!(action instanceof RunConfigurationAsAction)) {
+                    continue;
                 }
-                actionManager.unregisterAction(actionId);
+                int count = ((RunConfigurationAsAction) action).unregister();
+                if (count <= 0) {
+                    if (count < 0) {
+                        log.warn("Someone remove more action than register " + action);
+                    }
+                    actionManager.unregisterAction(actionId);
+                }
             }
         }
     }
 
     private void registerForAllExecutors(@NotNull RunnerAndConfigurationSettings settings) {
         Executor[] executors = ExecutorRegistry.getInstance().getRegisteredExecutors();
+        List<ExecutionTarget> targets = getTargets(settings);
         for (Executor executor : executors) {
-            registerAction(settings, executor);
+            for (ExecutionTarget target : targets) {
+                registerAction(settings, executor, target);
+            }
         }
+    }
+
+    @NotNull
+    private List<ExecutionTarget> getTargets(@NotNull RunnerAndConfigurationSettings runConfig) {
+        List<ExecutionTarget> targets = ExecutionTargetManager.getTargetsToChooseFor(myProject, runConfig);
+        targets = new ArrayList<>(targets);
+        targets.add(null);
+        return targets;
     }
 
     @NotNull
@@ -109,7 +136,7 @@ public class Bootstrap extends AbstractProjectComponent {
 
             @Override
             public void runConfigurationRemoved(@NotNull RunnerAndConfigurationSettings settings) {
-                removeForAllExecutors(settings.getName());
+                removeForAllExecutors(settings);
             }
         });
 
@@ -157,7 +184,7 @@ public class Bootstrap extends AbstractProjectComponent {
         RunManagerEx runManager = RunManagerEx.getInstanceEx(myProject);
         List<RunnerAndConfigurationSettings> allSettings = runManager.getAllSettings();
         for (RunnerAndConfigurationSettings setting : allSettings) {
-            removeForAllExecutors(setting.getName());
+            removeForAllExecutors(setting);
         }
     }
 }

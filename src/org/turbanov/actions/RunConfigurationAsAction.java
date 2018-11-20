@@ -1,8 +1,15 @@
 package org.turbanov.actions;
 
 import javax.swing.Icon;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.intellij.execution.ExecutionTarget;
+import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
 import com.intellij.execution.ProgramRunnerUtil;
@@ -17,23 +24,24 @@ import com.intellij.openapi.project.Project;
  * @author Andrey Turbanov
  * @since 27.01.2017
  */
-@SuppressWarnings("ComponentNotRegistered")
 public class RunConfigurationAsAction extends AnAction {
 
     private static final Logger log = Logger.getInstance(RunConfigurationAsAction.class);
 
     private final String runConfigurationName;
     private final String executorId;
+    private final String executionTargetId;
     private final AtomicInteger counter = new AtomicInteger(1);
 
-    public RunConfigurationAsAction(String runConfigurationName, String executorId, Icon icon, String text) {
+    public RunConfigurationAsAction(@NotNull String runConfigurationName, @NotNull String executorId, @Nullable Icon icon, @NotNull String text, @Nullable String executionTargetId) {
         super(text, null, icon);
         this.runConfigurationName = runConfigurationName;
         this.executorId = executorId;
+        this.executionTargetId = executionTargetId;
     }
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         if (project == null) return;
 
@@ -51,7 +59,27 @@ public class RunConfigurationAsAction extends AnAction {
             return;
         }
 
+        selectRequiredExecutionTarget(project, runConfig);
+
         ProgramRunnerUtil.executeConfiguration(project, runConfig, executor);
+    }
+
+    private void selectRequiredExecutionTarget(@NotNull Project project, @NotNull RunnerAndConfigurationSettings runConfig) {
+        if (executionTargetId == null) {
+            return; //use selected as is
+        }
+        ExecutionTargetManager targetManager = ExecutionTargetManager.getInstance(project);
+        ExecutionTarget executionTarget = targetManager.getActiveTarget();
+        if (executionTargetId.equals(executionTarget.getId())) {
+            return; //already selected ours
+        }
+        List<ExecutionTarget> targets = targetManager.getTargetsFor(runConfig);
+        for (ExecutionTarget target : targets) {
+            if (target.getId().equals(executionTargetId)) {
+                targetManager.setActiveTarget(target);
+                return;
+            }
+        }
     }
 
     public void register() {

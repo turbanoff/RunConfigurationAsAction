@@ -37,6 +37,7 @@ import com.intellij.util.IconUtil;
 import com.intellij.util.ui.EmptyIcon;
 import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.JBUI;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -45,7 +46,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CreateExecuteIconWithTextAction extends AnAction {
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
         MyDialogWrapper wrapper = new MyDialogWrapper();
         wrapper.show();
         if (wrapper.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
@@ -131,7 +132,7 @@ public class CreateExecuteIconWithTextAction extends AnAction {
             }
             textField.getDocument().addDocumentListener(new DocumentAdapter() {
                 @Override
-                protected void textChanged(DocumentEvent e) {
+                protected void textChanged(@NotNull DocumentEvent e) {
                     updateIcon();
                 }
             });
