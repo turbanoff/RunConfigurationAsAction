@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.intellij.execution.DefaultExecutionTarget;
 import com.intellij.execution.ExecutionTarget;
 import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
@@ -54,8 +55,13 @@ public class Bootstrap implements ProjectComponent {
         AnAction action = actionManager.getAction(actionId);
         if (action == null) {
             Icon icon = makeIcon(runConfig, executor);
-            String text = executor.getActionName() + " '" + runConfig.getName() + "'" +
-                    (target == null ? "" : " " + target.getDisplayName());
+            String targetAdd;
+            if (target == null || DefaultExecutionTarget.INSTANCE.equals(target)) {
+                targetAdd = "";
+            } else {
+                targetAdd = " " + target.getDisplayName();
+            }
+            String text = executor.getActionName() + " '" + runConfig.getName() + "'" + targetAdd;
             String executionTargetId = target == null ? null : target.getId();
             action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text, executionTargetId);
             actionManager.registerAction(actionId, action, PLUGIN_ID);
@@ -113,7 +119,10 @@ public class Bootstrap implements ProjectComponent {
 
     @NotNull
     private List<ExecutionTarget> getTargets(@NotNull RunnerAndConfigurationSettings runConfig) {
-        List<ExecutionTarget> targets = ExecutionTargetManager.getTargetsToChooseFor(myProject, runConfig);
+        List<ExecutionTarget> targets = ExecutionTargetManager.getInstance(myProject).getTargetsFor(runConfig);
+        if (targets.size() == 1 && DefaultExecutionTarget.INSTANCE.equals(targets.get(0))) {
+            return targets;
+        }
         targets = new ArrayList<>(targets);
         targets.add(null);
         return targets;

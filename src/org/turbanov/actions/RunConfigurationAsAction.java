@@ -12,9 +12,9 @@ import com.intellij.execution.ExecutionTarget;
 import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
-import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.runners.ExecutionUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -59,27 +59,26 @@ public class RunConfigurationAsAction extends AnAction {
             return;
         }
 
-        selectRequiredExecutionTarget(project, runConfig);
+        ExecutionTarget target = getExecutionTarget(project, runConfig);
 
-        ProgramRunnerUtil.executeConfiguration(project, runConfig, executor);
+        ExecutionUtil.runConfiguration(runConfig, executor, target);
     }
 
-    private void selectRequiredExecutionTarget(@NotNull Project project, @NotNull RunnerAndConfigurationSettings runConfig) {
-        if (executionTargetId == null) {
-            return; //use selected as is
-        }
+    @NotNull
+    private ExecutionTarget getExecutionTarget(@NotNull Project project, @NotNull RunnerAndConfigurationSettings runConfig) {
         ExecutionTargetManager targetManager = ExecutionTargetManager.getInstance(project);
-        ExecutionTarget executionTarget = targetManager.getActiveTarget();
-        if (executionTargetId.equals(executionTarget.getId())) {
-            return; //already selected ours
+        ExecutionTarget active = targetManager.getActiveTarget();
+        if (executionTargetId == null || executionTargetId.equals(active.getId())) {
+            return active; //use selected as is
         }
+
         List<ExecutionTarget> targets = targetManager.getTargetsFor(runConfig);
         for (ExecutionTarget target : targets) {
             if (target.getId().equals(executionTargetId)) {
-                targetManager.setActiveTarget(target);
-                return;
+                return target;
             }
         }
+        return active; //fallback to active
     }
 
     public void register() {

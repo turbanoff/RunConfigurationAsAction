@@ -14,7 +14,8 @@ Also it allows to create button in toolbar to run specific configuration.<br>
     <h3>1.3</h3>
       <ul>
         <li>Properly support execution targets (It includes support of CMake profiles.).
-        Now plugin register action not only per-Executor (Run/Debug/Coverage/...) but per-Executor-per-ExecutionTarget
+        Now plugin register action not only per-Executor (Run/Debug/Coverage/...) but per-Executor-per-ExecutionTarget.
+        Dropped support of old IDE. Now only 2018.1+ are supported.
         </li>
       </ul>
     <h3>1.2</h3>
@@ -28,7 +29,7 @@ Also it allows to create button in toolbar to run specific configuration.<br>
     ]]>
   </change-notes>
 
-  <idea-version since-build="143.0"/>
+  <idea-version since-build="181"/>
 
   <depends>com.intellij.modules.platform</depends>
 
