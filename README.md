@@ -20,9 +20,9 @@ https://plugins.jetbrains.com/idea/plugin/9448-run-configuration-as-action
 ## Configuration
 To use plugin after installation you should tweak IDE settings.
 
-##### To add icon too toolbar go to:
+##### To add an icon too toolbar go to:
   1. File > Settings > Appearance & Behavior > Menus and Toolbars
-  2. Choose toolbar to add button: Main Toolbar or Navigation Bar Toolbar
+  2. Choose a toolbar to add a button: Main Toolbar or Navigation Bar Toolbar
   3. Click 'Add after' button and choose action in the tree: All actions > Plug-ins > Run Configurations as Action
   
   ![plugin_actions_in_customize_toolbars](https://cloud.githubusercontent.com/assets/741251/22664412/a620b70e-ecc1-11e6-84e1-4e0e2987d43e.png)
@@ -33,7 +33,7 @@ To use plugin after installation you should tweak IDE settings.
    ![plugin_actions_in_keymap](https://cloud.githubusercontent.com/assets/741251/22664411/a3ece9da-ecc1-11e6-99f0-bc2b9766b5c1.png)
 
 ## Generate custom icons
-   By default plugin uses not user-friendly icons. Of course, you can always create icon by yourself.
+   By default the plugin uses not user-friendly icons. Of course, you can always create an icon by yourself.
    But developers are lazy (_I know_). Plugin can help with generating custom icons.
    
    Tools > Create Icon with text  

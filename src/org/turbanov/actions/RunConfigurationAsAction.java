@@ -4,10 +4,6 @@ import javax.swing.Icon;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.intellij.execution.ExecutionTarget;
 import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
@@ -19,6 +15,9 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Andrey Turbanov
@@ -72,7 +71,7 @@ public class RunConfigurationAsAction extends AnAction {
             return active; //use selected as is
         }
 
-        List<ExecutionTarget> targets = targetManager.getTargetsFor(runConfig);
+        List<ExecutionTarget> targets = targetManager.getTargetsFor(runConfig.getConfiguration());
         for (ExecutionTarget target : targets) {
             if (target.getId().equals(executionTargetId)) {
                 return target;

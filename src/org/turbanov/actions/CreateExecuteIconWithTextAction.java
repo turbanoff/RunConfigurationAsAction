@@ -11,12 +11,10 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import com.intellij.execution.Executor;
-import com.intellij.execution.ExecutorRegistry;
 import com.intellij.ide.IdeBundle;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -37,8 +35,11 @@ import com.intellij.util.IconUtil;
 import com.intellij.util.ui.EmptyIcon;
 import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.JBUI;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * @author Andrey Turbanov
@@ -60,7 +61,12 @@ public class CreateExecuteIconWithTextAction extends AnAction {
                         }
                         VirtualFile child = dir.findChild(fileName);
                         if (child != null) {
-                            if (Messages.OK != Messages.showOkCancelDialog(IdeBundle.message("prompt.overwrite.settings.file", child.toString()), IdeBundle.message("title.file.already.exists"), Messages.getWarningIcon()))
+                            if (Messages.OK != Messages.showOkCancelDialog(
+                                    IdeBundle.message("prompt.overwrite.settings.file", child.toString()),
+                                    IdeBundle.message("title.file.already.exists"),
+                                    IdeBundle.message("action.overwrite"),
+                                    Messages.getCancelButton(),
+                                    Messages.getWarningIcon()))
                                 return;
                         }
                         ApplicationManager.getApplication().runWriteAction(() -> {
@@ -101,7 +107,7 @@ public class CreateExecuteIconWithTextAction extends AnAction {
         @Nullable
         @Override
         protected JComponent createCenterPanel() {
-            Executor[] executors = ExecutorRegistry.getInstance().getRegisteredExecutors();
+            List<Executor> executors = Executor.EXECUTOR_EXTENSION_NAME.getExtensionList();
             ButtonGroup buttonGroup = new ButtonGroup();
             Box boxWithExecutors = Box.createVerticalBox();
             textField = new JBTextField();
@@ -154,7 +160,7 @@ public class CreateExecuteIconWithTextAction extends AnAction {
             Icon iconWithText = IconUtil.textToIcon(textField.getText(), new JLabel(), JBUI.scale(fontScaleModel.getNumber().floatValue()));
             icon.setIcon(iconWithText, 1, SwingConstants.SOUTH_EAST);
             //crop to allow to use as action icon. Copied from CustomizableActionsPanel.doSetIcon()
-            Icon result = IconUtil.cropIcon(icon, EmptyIcon.ICON_18.getIconWidth(), EmptyIcon.ICON_16.getIconHeight());
+            Icon result = IconUtil.cropIcon(icon, EmptyIcon.ICON_18.getIconWidth(), EmptyIcon.ICON_18.getIconHeight());
             resultIconLabel.setIcon(result);
             resultIconLabel.setMaximumSize(resultIconLabel.getPreferredSize());
         }
