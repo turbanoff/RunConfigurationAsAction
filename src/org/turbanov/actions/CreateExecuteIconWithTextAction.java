@@ -65,7 +65,7 @@ public class CreateExecuteIconWithTextAction extends AnAction {
                                     IdeBundle.message("prompt.overwrite.settings.file", child.toString()),
                                     IdeBundle.message("title.file.already.exists"),
                                     IdeBundle.message("action.overwrite"),
-                                    Messages.getCancelButton(),
+                                    "Cancel",
                                     Messages.getWarningIcon()))
                                 return;
                         }
