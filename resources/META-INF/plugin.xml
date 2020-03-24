@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.4</version>
+  <version>1.4.1</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
