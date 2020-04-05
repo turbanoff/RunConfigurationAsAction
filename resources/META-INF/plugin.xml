@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
@@ -11,13 +11,18 @@ Also it allows to create button in toolbar to run specific configuration.<br>
     ]]></description>
 
   <change-notes><![CDATA[
+    <h3>1.4.2</h3>
+      <ul>
+        <li>Properly show Run configurations with underscore character.
+        </li>
+      </ul>
     <h3>1.4.1</h3>
       <ul>
         <li>Fix compatibility problems.
         Dropped support of 2018.x IDE. Now only 2019.1+ are supported.
         </li>
       </ul>
-      <h3>1.4</h3>
+    <h3>1.4</h3>
       <ul>
         <li>Fix customs icons loading for registered actions.
         </li>

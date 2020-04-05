@@ -20,7 +20,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtilRt;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ImageLoader;
 import com.intellij.util.ui.JBImageIcon;
@@ -53,13 +53,7 @@ public class Bootstrap implements ProjectComponent {
         ActionManager actionManager = ActionManagerEx.getInstance();
         AnAction action = actionManager.getAction(actionId);
         if (action == null) {
-            String targetAdd;
-            if (target == null || DefaultExecutionTarget.INSTANCE.equals(target)) {
-                targetAdd = "";
-            } else {
-                targetAdd = " " + target.getDisplayName();
-            }
-            String text = executor.getActionName() + " '" + runConfig.getName() + "'" + targetAdd;
+            String text = getActionText(runConfig, executor, target);
             String executionTargetId = target == null ? null : target.getId();
             Icon icon = loadIcon(actionId);
             if (icon == null) {
@@ -75,6 +69,18 @@ public class Bootstrap implements ProjectComponent {
     }
 
     @NotNull
+    private String getActionText(@NotNull RunnerAndConfigurationSettings runConfig, @NotNull Executor executor, @Nullable ExecutionTarget target) {
+        String targetAdd;
+        if (target == null || DefaultExecutionTarget.INSTANCE.equals(target)) {
+            targetAdd = "";
+        } else {
+            targetAdd = " " + target.getDisplayName();
+        }
+        String text = executor.getActionName() + " '" + runConfig.getName() + "'" + targetAdd;
+        return StringUtil.escapeMnemonics(text);
+    }
+
+    @NotNull
     private Icon makeIcon(@NotNull RunnerAndConfigurationSettings runConfig, @NotNull Executor executor) {
         Icon icon = executor.getIcon();
         Icon result = IconUtil.addText(icon, runConfig.getName());
@@ -84,7 +90,7 @@ public class Bootstrap implements ProjectComponent {
     @Nullable
     private Icon loadIcon(@NotNull String actionId) {
         String iconPath = CustomActionsSchema.getInstance().getIconPath(actionId);
-        if (StringUtilRt.isEmpty(iconPath)) {
+        if (StringUtil.isEmpty(iconPath)) {
             return null;
         }
         //copied from CustomActionsSchema.initActionIcons
