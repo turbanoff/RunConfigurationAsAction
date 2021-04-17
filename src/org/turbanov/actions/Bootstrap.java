@@ -23,6 +23,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ImageLoader;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.ui.JBImageIcon;
 
 import java.awt.Image;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Andrey Turbanov
@@ -39,6 +41,7 @@ public class Bootstrap implements ProjectComponent {
     private static final Logger log = Logger.getInstance(RunConfigurationAsAction.class);
     private static final String ACTION_ID_PREFIX = "RunConfigurationAsAction";
     private static final PluginId PLUGIN_ID = PluginId.getId("org.turbanov.run.configuration.as.action");
+    private static final ExecutorService ourExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("RunConfigurationAsAction", 1);
 
     private final Project myProject;
 
@@ -117,6 +120,10 @@ public class Bootstrap implements ProjectComponent {
     }
 
     public void removeForAllExecutors(@NotNull RunnerAndConfigurationSettings runConfig) {
+        ourExecutor.execute(() -> removeForAllExecutorsImpl(runConfig));
+    }
+
+    private void removeForAllExecutorsImpl(@NotNull RunnerAndConfigurationSettings runConfig) {
         List<Executor> executors = Executor.EXECUTOR_EXTENSION_NAME.getExtensionList();
         ActionManager actionManager = ActionManager.getInstance();
         List<ExecutionTarget> targets = getTargets(runConfig);
@@ -138,7 +145,11 @@ public class Bootstrap implements ProjectComponent {
         }
     }
 
-    private void registerForAllExecutors(@NotNull RunnerAndConfigurationSettings settings) {
+    private void registerForAllExecutors(@NotNull RunnerAndConfigurationSettings runConfig) {
+        ourExecutor.execute(() -> registerForAllExecutorsImpl(runConfig));
+    }
+
+    private void registerForAllExecutorsImpl(@NotNull RunnerAndConfigurationSettings settings) {
         List<Executor> executors = Executor.EXECUTOR_EXTENSION_NAME.getExtensionList();
         List<ExecutionTarget> targets = getTargets(settings);
         for (Executor executor : executors) {
