@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -44,6 +46,7 @@ public class Bootstrap implements ProjectComponent {
     private static final ExecutorService ourExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("RunConfigurationAsAction", 1);
 
     private final Project myProject;
+    private final Set<String> registeredActions = ConcurrentHashMap.newKeySet();
 
     public Bootstrap(@NotNull Project project) {
         this.myProject = project;
@@ -64,8 +67,10 @@ public class Bootstrap implements ProjectComponent {
             }
             action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text, executionTargetId);
             actionManager.registerAction(actionId, action, PLUGIN_ID);
+            registeredActions.add(actionId);
         } else if (action instanceof RunConfigurationAsAction) {
             ((RunConfigurationAsAction) action).register();
+            registeredActions.add(actionId);
         } else {
             log.warn("Someone uses our action id = " + actionId + ": " + action.getClass() + " " + action);
         }
@@ -130,17 +135,7 @@ public class Bootstrap implements ProjectComponent {
         for (Executor executor : executors) {
             for (ExecutionTarget target : targets) {
                 String actionId = makeActionId(executor, runConfig, target);
-                AnAction action = actionManager.getAction(actionId);
-                if (!(action instanceof RunConfigurationAsAction)) {
-                    continue;
-                }
-                int count = ((RunConfigurationAsAction) action).unregister();
-                if (count <= 0) {
-                    if (count < 0) {
-                        log.warn("Someone remove more action than register " + action);
-                    }
-                    actionManager.unregisterAction(actionId);
-                }
+                unregisterAction(actionManager, actionId);
             }
         }
     }
@@ -199,10 +194,24 @@ public class Bootstrap implements ProjectComponent {
 
     @Override
     public void projectClosed() {
-        RunManagerEx runManager = RunManagerEx.getInstanceEx(myProject);
-        List<RunnerAndConfigurationSettings> allSettings = runManager.getAllSettings();
-        for (RunnerAndConfigurationSettings setting : allSettings) {
-            removeForAllExecutors(setting);
+        ActionManager actionManager = ActionManager.getInstance();
+        for (String actionId : registeredActions) {
+            unregisterAction(actionManager, actionId);
+        }
+    }
+
+    private void unregisterAction(ActionManager actionManager, String actionId) {
+        registeredActions.remove(actionId);
+        AnAction action = actionManager.getAction(actionId);
+        if (!(action instanceof RunConfigurationAsAction)) {
+            return;
+        }
+        int count = ((RunConfigurationAsAction) action).unregister();
+        if (count <= 0) {
+            if (count < 0) {
+                log.warn("Someone remove more action than register " + action);
+            }
+            actionManager.unregisterAction(actionId);
         }
     }
 }
