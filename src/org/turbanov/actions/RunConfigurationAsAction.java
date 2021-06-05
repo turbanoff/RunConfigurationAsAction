@@ -11,6 +11,7 @@ import com.intellij.execution.ExecutorRegistry;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.runners.ExecutionUtil;
+import com.intellij.ide.macro.MacroManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -59,8 +60,8 @@ public class RunConfigurationAsAction extends AnAction {
         }
 
         ExecutionTarget target = getExecutionTarget(project, runConfig);
-
-        ExecutionUtil.runConfiguration(runConfig, executor, target);
+        MacroManager.getInstance().cacheMacrosPreview(e.getDataContext());
+        ExecutionUtil.doRunConfiguration(runConfig, executor, target, null, e.getDataContext());
     }
 
     @NotNull
