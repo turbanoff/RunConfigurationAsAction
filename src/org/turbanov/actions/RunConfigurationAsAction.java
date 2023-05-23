@@ -4,16 +4,23 @@ import javax.swing.Icon;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.intellij.execution.ExecutionManager;
 import com.intellij.execution.ExecutionTarget;
 import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
+import com.intellij.execution.ExecutorRegistryImpl;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.RunnerAndConfigurationSettings;
-import com.intellij.execution.runners.ExecutionUtil;
+import com.intellij.execution.compound.CompoundRunConfiguration;
+import com.intellij.execution.compound.SettingsAndEffectiveTarget;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
 import com.intellij.ide.macro.MacroManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 
@@ -31,13 +38,15 @@ public class RunConfigurationAsAction extends AnAction {
     private final String runConfigurationName;
     private final String executorId;
     private final String executionTargetId;
+    private final int baselineVersion;
     private final AtomicInteger counter = new AtomicInteger(1);
 
-    public RunConfigurationAsAction(@NotNull String runConfigurationName, @NotNull String executorId, @Nullable Icon icon, @NotNull String text, @Nullable String executionTargetId) {
+    public RunConfigurationAsAction(@NotNull String runConfigurationName, @NotNull String executorId, @Nullable Icon icon, @NotNull String text, @Nullable String executionTargetId, int baselineVersion) {
         super(text, null, icon);
         this.runConfigurationName = runConfigurationName;
         this.executorId = executorId;
         this.executionTargetId = executionTargetId;
+        this.baselineVersion = baselineVersion;
     }
 
     @Override
@@ -60,8 +69,30 @@ public class RunConfigurationAsAction extends AnAction {
         }
 
         ExecutionTarget target = getExecutionTarget(project, runConfig);
-        MacroManager.getInstance().cacheMacrosPreview(e.getDataContext());
-        ExecutionUtil.doRunConfiguration(runConfig, executor, target, null, e.getDataContext());
+
+        if (baselineVersion < 232) { //not needed for 2023.2+
+            https://github.com/JetBrains/intellij-community/commit/76170089e6b2521942ddf54b53606d5fd4956b33
+            MacroManager.getInstance().cacheMacrosPreview(e.getDataContext());
+        }
+
+        // Copy of 'com.intellij.execution.ExecutorRegistryImpl.RunnerHelper.runSubProcess'
+        RunConfiguration configuration = runConfig.getConfiguration();
+        DataContext dataContext = e.getDataContext();
+
+        if (configuration instanceof CompoundRunConfiguration) {
+            for (SettingsAndEffectiveTarget settingsAndEffectiveTarget : ((CompoundRunConfiguration) configuration)
+                    .getConfigurationsWithEffectiveRunTargets()) {
+                RunConfiguration subConfiguration = settingsAndEffectiveTarget.getConfiguration();
+                ExecutorRegistryImpl.RunnerHelper.run(project, subConfiguration, runManager.findSettings(subConfiguration), dataContext, executor);
+            }
+        } else {
+            ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(executor, runConfig);
+            if (builder == null) {
+                return;
+            }
+            ExecutionEnvironment environment = builder.target(target).dataContext(dataContext).build();
+            ExecutionManager.getInstance(project).restartRunProfile(environment);
+        }
     }
 
     @NotNull

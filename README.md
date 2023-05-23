@@ -2,7 +2,7 @@
 
 Plugins for Jetbrains IDEs. It's provides a way to use run configurations as buttons on toolbar. Or assign shortcuts to execute specific run configuration.
 
-Plugin is compatible with all major IDEs based on IntelliJ Platform starting from version 2019.2:
+Plugin is compatible with all major IDEs based on IntelliJ Platform starting from version 2020.1:
 * IntelliJ IDEA
 * Android Studio
 * PhpStorm
@@ -33,7 +33,7 @@ To use plugin after installation you should tweak IDE settings.
    ![plugin_actions_in_keymap](https://cloud.githubusercontent.com/assets/741251/22664411/a3ece9da-ecc1-11e6-99f0-bc2b9766b5c1.png)
 
 ## Generate custom icons
-   By default the plugin uses not user-friendly icons. Of course, you can always create an icon by yourself.
+   By default, the plugin uses not user-friendly icons. Of course, you can always create an icon by yourself.
    But developers are lazy (_I know_). Plugin can help with generating custom icons.
    
    Tools > Create Icon with text  

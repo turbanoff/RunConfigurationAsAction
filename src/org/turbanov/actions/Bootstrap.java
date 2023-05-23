@@ -15,6 +15,7 @@ import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
@@ -47,9 +48,11 @@ public class Bootstrap implements ProjectComponent {
 
     private final Project myProject;
     private final Set<String> registeredActions = ConcurrentHashMap.newKeySet();
+    private final int baselineVersion;
 
     public Bootstrap(@NotNull Project project) {
         this.myProject = project;
+        this.baselineVersion = ApplicationInfo.getInstance().getBuild().getBaselineVersion();
     }
 
     private void registerAction(@NotNull RunnerAndConfigurationSettings runConfig,
@@ -65,7 +68,7 @@ public class Bootstrap implements ProjectComponent {
             if (icon == null) {
                 icon = makeIcon(runConfig, executor);
             }
-            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text, executionTargetId);
+            action = new RunConfigurationAsAction(runConfig.getName(), executor.getId(), icon, text, executionTargetId, baselineVersion);
             actionManager.registerAction(actionId, action, PLUGIN_ID);
             registeredActions.add(actionId);
         } else if (action instanceof RunConfigurationAsAction) {
