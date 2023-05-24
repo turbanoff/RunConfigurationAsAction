@@ -2,7 +2,7 @@
 
 Plugins for Jetbrains IDEs. It's provides a way to use run configurations as buttons on toolbar. Or assign shortcuts to execute specific run configuration.
 
-Plugin is compatible with all major IDEs based on IntelliJ Platform starting from version 2020.1:
+Plugin is compatible with all major IDEs based on IntelliJ Platform starting from version 2021.1:
 * IntelliJ IDEA
 * Android Studio
 * PhpStorm

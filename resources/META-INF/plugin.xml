@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.5</version>
+  <version>1.5.1</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
@@ -11,6 +11,10 @@ Also, it allows to create button in toolbar to run specific configuration.<br>
     ]]></description>
 
   <change-notes><![CDATA[
+    <h3>1.5.1</h3>
+      <ul>
+        <li>Drop support of 2020. Now only 2021+ is supported</li>
+      </ul>
     <h3>1.5</h3>
       <ul>
         <li>Support Compound configuration</li>
@@ -64,7 +68,7 @@ Also, it allows to create button in toolbar to run specific configuration.<br>
     ]]>
   </change-notes>
 
-  <idea-version since-build="201"/>
+  <idea-version since-build="211"/>
 
   <depends>com.intellij.modules.platform</depends>
 
