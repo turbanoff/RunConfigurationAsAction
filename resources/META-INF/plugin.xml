@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>1.5.1</version>
+  <version>2.2</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
@@ -11,6 +11,10 @@ Also, it allows to create button in toolbar to run specific configuration.<br>
     ]]></description>
 
   <change-notes><![CDATA[
+    <h3>2.2</h3>
+      <ul>
+        <li>Version just to override incorrectly uploaded version</li>
+      </ul>
     <h3>1.5.1</h3>
       <ul>
         <li>Drop support of 2020. Now only 2021+ is supported</li>
