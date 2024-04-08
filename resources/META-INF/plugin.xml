@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.turbanov.run.configuration.as.action</id>
   <name>Run Configuration as Action</name>
-  <version>2.2</version>
+  <version>3.0</version>
   <vendor email="turbanoff@gmail.com" url="https://github.com/turbanoff/RunConfigurationAsAction">Turbanov Andrey</vendor>
 
   <description><![CDATA[
@@ -11,6 +11,10 @@ Also, it allows to create button in toolbar to run specific configuration.<br>
     ]]></description>
 
   <change-notes><![CDATA[
+    <h3>3.0</h3>
+      <ul>
+        <li>Require 2023.x to be able to use new API</li>
+      </ul>
     <h3>2.2</h3>
       <ul>
         <li>Version just to override incorrectly uploaded version</li>
@@ -72,15 +76,12 @@ Also, it allows to create button in toolbar to run specific configuration.<br>
     ]]>
   </change-notes>
 
-  <idea-version since-build="211"/>
+  <idea-version since-build="231"/>
 
   <depends>com.intellij.modules.platform</depends>
-
-  <project-components>
-    <component>
-      <implementation-class>org.turbanov.actions.Bootstrap</implementation-class>
-    </component>
-  </project-components>
+  <extensions defaultExtensionNs="com.intellij">
+    <postStartupActivity implementation="org.turbanov.actions.BootstrapActivity"/>
+  </extensions>
   <actions>
     <action id="org.turbanov.actions.CreateExecuteIconWithTextAction" class="org.turbanov.actions.CreateExecuteIconWithTextAction" text="Create Icon with Text">
       <add-to-group group-id="ToolsMenu" anchor="last"/>

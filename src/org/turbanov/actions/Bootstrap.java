@@ -16,7 +16,6 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
 import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
@@ -40,7 +39,7 @@ import java.util.concurrent.ExecutorService;
  * @author Andrey Turbanov
  * @since 27.01.2017
  */
-public class Bootstrap implements ProjectComponent {
+public class Bootstrap {
     private static final Logger log = Logger.getInstance(RunConfigurationAsAction.class);
     private static final String ACTION_ID_PREFIX = "RunConfigurationAsAction";
     private static final PluginId PLUGIN_ID = PluginId.getId("org.turbanov.run.configuration.as.action");
@@ -168,13 +167,6 @@ public class Bootstrap implements ProjectComponent {
         return targets;
     }
 
-    @NotNull
-    @Override
-    public String getComponentName() {
-        return ACTION_ID_PREFIX;
-    }
-
-    @Override
     public void projectOpened() {
         myProject.getMessageBus().connect().subscribe(RunManagerListener.TOPIC, new RunManagerListener() {
             @Override
@@ -195,7 +187,6 @@ public class Bootstrap implements ProjectComponent {
         }
     }
 
-    @Override
     public void projectClosed() {
         ActionManager actionManager = ActionManager.getInstance();
         for (String actionId : registeredActions) {
