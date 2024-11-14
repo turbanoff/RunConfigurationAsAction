@@ -9,7 +9,6 @@ import com.intellij.execution.ExecutionTarget;
 import com.intellij.execution.ExecutionTargetManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
-import com.intellij.execution.ExecutorRegistryImpl;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.compound.CompoundRunConfiguration;
@@ -75,15 +74,27 @@ public class RunConfigurationAsAction extends AnAction {
             MacroManager.getInstance().cacheMacrosPreview(e.getDataContext());
         }
 
-        // Copy of 'com.intellij.execution.ExecutorRegistryImpl.RunnerHelper.runSubProcess'
+        runSubProcess(e.getDataContext(), runConfig, project, runManager, executor, target);
+    }
+
+    // Copy of 'com.intellij.execution.ExecutorRegistryImpl.RunnerHelper.runSubProcess'
+    private static void runSubProcess(DataContext dataContext,
+                                      RunnerAndConfigurationSettings runConfig,
+                                      Project project,
+                                      RunManagerEx runManager,
+                                      Executor executor,
+                                      ExecutionTarget target)
+    {
         RunConfiguration configuration = runConfig.getConfiguration();
-        DataContext dataContext = e.getDataContext();
 
         if (configuration instanceof CompoundRunConfiguration) {
             for (SettingsAndEffectiveTarget settingsAndEffectiveTarget : ((CompoundRunConfiguration) configuration)
                     .getConfigurationsWithEffectiveRunTargets()) {
                 RunConfiguration subConfiguration = settingsAndEffectiveTarget.getConfiguration();
-                ExecutorRegistryImpl.RunnerHelper.run(project, subConfiguration, runManager.findSettings(subConfiguration), dataContext, executor);
+                RunnerAndConfigurationSettings settings = runManager.findSettings(subConfiguration);
+                if (settings != null) {
+                    runSubProcess(dataContext, settings, project, runManager, executor, target);
+                }
             }
         } else {
             ExecutionEnvironmentBuilder builder = ExecutionEnvironmentBuilder.createOrNull(executor, runConfig);
